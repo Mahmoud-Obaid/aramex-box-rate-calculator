@@ -58,7 +58,7 @@ Aramex's API (ws.aramex.net) doesn't send CORS headers, so browsers block direct
 
 It's zero-dependency — built entirely from Node's core http module, so no npm install is required.
 
-#File structure
+# File structure
 ├── box_classes.html   # The entire app — UI, styling, and logic in one file
 ├── proxy.js            # Local API proxy (only needed for City/State lookups and rate calls)
 └── README.md
@@ -71,7 +71,7 @@ Open a terminal in this folder and run:
 
 Leave it running — you should see Aramex proxy running at http://localhost:3001. 2. Open box_classes.html in your browser (double-click it — no server needed for the page itself). 3. Fill in your Aramex credentials at the top and click Save Credentials. 4. Fill in Origin and Destination addresses. 5. Use the Shipment Box & Weight Finder (or Smart Box Finder → "Send to Calculate Rate") to determine the box and total weight. 6. In the Calculate Rate section, pick a Product Type and currency, then click Get Shipping Rate.
 
-#Aramex APIs used
+# Aramex APIs used
 Purpose	Endpoint
 Fetch states/provinces	Location/Service_1_0.svc/json/FetchStates
 Fetch cities	Location/Service_1_0.svc/json/FetchCities
@@ -79,7 +79,7 @@ Calculate shipping rate	RateCalculator/Service_1_0.svc/json/CalculateRate
 
 (Country list is static/local — not fetched live, since it rarely changes and avoids an unnecessary API call on every page load.)
 
-#Known limitations
+# Known limitations
 CalculateRate response shape is assumed. Only the request schema for CalculateRate was available while building this; the result panel looks for a TotalAmount.Value / CurrencyCode field and falls back to showing the raw JSON response if the actual shape differs. Adjust renderRateResult() in box_classes.html once you've seen a real response.
 proxy.js must be running for City, State, and rate-calculation features to work — this is unavoidable given Aramex's API doesn't support browser CORS.
 Credentials are stored in browser localStorage in plain form once saved. Fine for local/personal use; don't deploy this as-is to a shared or public-facing environment without adding proper server-side credential handling.
