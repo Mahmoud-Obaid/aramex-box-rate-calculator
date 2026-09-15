@@ -59,9 +59,9 @@ Aramex's API (ws.aramex.net) doesn't send CORS headers, so browsers block direct
 It's zero-dependency — built entirely from Node's core http module, so no npm install is required.
 
 # File structure
-├── box_classes.html   # The entire app — UI, styling, and logic in one file
-├── proxy.js            # Local API proxy (only needed for City/State lookups and rate calls)
-└── README.md
+box_classes.html   # The entire app — UI, styling, and logic in one file
+proxy.js            # Local API proxy (only needed for City/State lookups and rate calls)
+README.md
 Setup & usage
 
 Requirements: Node.js 18 or later (needed for proxy.js's built-in fetch()). Check your version with node --version.
