@@ -69,6 +69,8 @@ It's **zero-dependency** — built entirely from Node's core `http` module, so n
 ├── box_classes.html    # The entire app — UI, styling, and logic in one file
 ├── proxy.js            # Local API proxy (only needed for City/State lookups and rate calls)
 └── README.md
+
+
 ## 🚀 Setup & UsageRequirements:
 
 Node.js 18 or later (needed for proxy.js's built-in fetch()). Check your version with:Bashnode --version
