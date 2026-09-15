@@ -92,8 +92,8 @@ Author
 
 # Mahmoud Obaid
 
-# Communication Technology Engineer
+Communication Technology Engineer
 
-# Senior IT Analyst
+Senior IT Analyst
 
-# GitHub: https://github.com/Mahmoud-Obaid
+GitHub: https://github.com/Mahmoud-Obaid
