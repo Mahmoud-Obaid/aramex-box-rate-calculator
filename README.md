@@ -88,9 +88,9 @@ Tech stack
 Vanilla HTML/CSS/JavaScript (no framework, no build step) + a dependency-free Node.js proxy script.
 
 
-Author
+# Author
 
-# Mahmoud Obaid
+Mahmoud Obaid
 
 Communication Technology Engineer
 
