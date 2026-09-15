@@ -1,0 +1,1718 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Aramex Box Classes & Smart Box Finder</title>
+<style>
+  :root {
+    --primary: #ce2029;
+    --dark: #222;
+    --bg: #f7f7f8;
+    --border: #ddd;
+    --ok: #2f855a;
+    --err: #c53030;
+  }
+  * { box-sizing: border-box; }
+  body {
+    font-family: -apple-system, "Segoe UI", Roboto, Arial, sans-serif;
+    background: var(--bg);
+    color: var(--dark);
+    margin: 0;
+    padding: 30px 20px;
+  }
+  .container {
+    max-width: 780px;
+    margin: 0 auto 30px auto;
+    background: #fff;
+    border-radius: 10px;
+    box-shadow: 0 2px 10px rgba(0,0,0,0.08);
+    padding: 30px 32px;
+  }
+  h1 { font-size: 22px; margin-top: 0; color: var(--dark); }
+  h2 { font-size: 18px; margin-top: 0; color: var(--dark); border-bottom: 2px solid var(--primary); padding-bottom: 8px;}
+  .section { margin-bottom: 24px; }
+  label { display: block; font-weight: 600; margin-bottom: 8px; font-size: 15px; }
+  select {
+    width: 100%; padding: 10px 12px; font-size: 15px;
+    border: 1px solid var(--border); border-radius: 6px; background: #fff;
+  }
+  button {
+    margin-top: 16px; background: var(--primary); color: #fff; border: none;
+    padding: 10px 22px; font-size: 15px; font-weight: 600; border-radius: 6px; cursor: pointer;
+  }
+  button:hover { background: #a91820; }
+  table { width: 100%; border-collapse: collapse; margin-top: 24px; font-size: 14px; }
+  th, td { border: 1px solid var(--border); padding: 8px 10px; text-align: center; }
+  th { background: var(--dark); color: #fff; }
+  tr:nth-child(even) { background: #fafafa; }
+  .class-tag { display: inline-block; padding: 2px 8px; border-radius: 4px; font-size: 12px; font-weight: 600; color: #fff; }
+  .tag-a { background: #2b6cb0; }
+  .tag-b { background: #b7791f; }
+  .empty-msg { margin-top: 20px; color: #888; font-size: 14px; }
+  .count { margin-top: 10px; font-size: 13px; color: #666; }
+
+  /* Section 2 specific */
+  .item-row {
+    display: grid;
+    grid-template-columns: 90px 1fr 1fr 1fr;
+    gap: 10px;
+    align-items: center;
+    margin-bottom: 10px;
+  }
+  .item-row .item-label { font-weight: 600; font-size: 14px; }
+  .item-row input {
+    width: 100%;
+    padding: 8px 10px;
+    font-size: 14px;
+    border: 1px solid var(--border);
+    border-radius: 6px;
+  }
+  .input-error {
+    border-color: var(--err) !important;
+    background: #fff5f5 !important;
+  }
+  .item-row input.input-error {
+    border-color: var(--err);
+    background: #fff5f5;
+  }
+  .dim-header {
+    display: grid;
+    grid-template-columns: 90px 1fr 1fr 1fr;
+    gap: 10px;
+    font-size: 12px;
+    font-weight: 700;
+    color: #666;
+    margin-bottom: 6px;
+    text-transform: uppercase;
+  }
+  .item-row-weight {
+    display: grid;
+    grid-template-columns: 90px 1fr 1fr 1fr 1fr;
+    gap: 10px;
+    align-items: center;
+    margin-bottom: 10px;
+  }
+  .item-row-weight .item-label { font-weight: 600; font-size: 14px; }
+  .item-row-weight input {
+    width: 100%;
+    padding: 8px 10px;
+    font-size: 14px;
+    border: 1px solid var(--border);
+    border-radius: 6px;
+  }
+  .item-row-weight input.input-error {
+    border-color: var(--err);
+    background: #fff5f5;
+  }
+  .dim-header-weight {
+    display: grid;
+    grid-template-columns: 90px 1fr 1fr 1fr 1fr;
+    gap: 10px;
+    font-size: 12px;
+    font-weight: 700;
+    color: #666;
+    margin-bottom: 6px;
+    text-transform: uppercase;
+  }
+  #itemRowsContainer { margin-top: 14px; }
+  .error-banner {
+    display: none;
+    margin-top: 14px;
+    background: #fff5f5;
+    border: 1px solid var(--err);
+    color: var(--err);
+    padding: 10px 14px;
+    border-radius: 6px;
+    font-size: 14px;
+    font-weight: 600;
+  }
+  .result-box {
+    margin-top: 24px;
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    padding: 20px;
+    background: #f0fff4;
+  }
+  .result-box.fail {
+    background: #fff5f5;
+  }
+  .result-grid {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 12px;
+    margin-top: 12px;
+    font-size: 14px;
+  }
+  .result-grid .rlabel { color: #666; font-size: 12px; text-transform: uppercase; font-weight: 700; }
+  .result-grid .rvalue { font-size: 16px; font-weight: 700; }
+  .big-code { font-size: 26px; font-weight: 800; color: var(--primary); }
+
+  .cred-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 16px;
+    margin-bottom: 6px;
+  }
+  .cred-grid input, .cred-grid select {
+    width: 100%;
+    padding: 10px 12px;
+    font-size: 14px;
+    border: 1px solid var(--border);
+    border-radius: 6px;
+    background: #fff;
+  }
+  .cred-status { margin-top: 12px; font-size: 13px; }
+  .cred-status.error { color: var(--err); }
+  .cred-status.success { color: var(--ok); }
+  .cred-status.loading { color: #666; }
+
+  .addr-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 16px;
+  }
+  .addr-grid .addr-span2 { grid-column: span 2; }
+  .addr-grid label { display: block; font-weight: 600; margin-bottom: 8px; font-size: 15px; }
+  .addr-grid input, .addr-grid select {
+    width: 100%;
+    padding: 10px 12px;
+    font-size: 14px;
+    border: 1px solid var(--border);
+    border-radius: 6px;
+    background: #fff;
+  }
+  .addr-grid select:disabled { background: #f2f2f2; color: #999; }
+  .req { color: var(--err); }
+
+  .required-mark { color: var(--err); margin-left: 3px; }
+  .addr-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 16px;
+    margin-bottom: 6px;
+  }
+  .addr-grid .full-width { grid-column: 1 / -1; }
+  .addr-grid input, .addr-grid select, .addr-grid textarea {
+    width: 100%;
+    padding: 10px 12px;
+    font-size: 14px;
+    border: 1px solid var(--border);
+    border-radius: 6px;
+    background: #fff;
+    font-family: inherit;
+  }
+  .addr-grid select:disabled, .addr-grid input:disabled {
+    background: #f0f0f0;
+    color: #999;
+  }
+  .address-status { margin-top: 12px; font-size: 13px; min-height: 16px; }
+  .address-status.error { color: var(--err); }
+  .address-status.loading { color: #666; }
+</style>
+</head>
+<body>
+
+<!-- CREDENTIALS SECTION -->
+<div class="container" id="credentialsContainer">
+  <h2>Aramex API Credentials</h2>
+  <p style="color:#666; font-size:14px; margin-top:-6px; margin-bottom:16px;">
+    These credentials authenticate the Aramex API calls used elsewhere on this page (Countries, States, Cities, Rate Calculator).
+  </p>
+  <div class="cred-grid">
+    <div>
+      <label for="credUsername">Username</label>
+      <input type="text" id="credUsername" placeholder="Username">
+    </div>
+    <div>
+      <label for="credPassword">Password</label>
+      <input type="password" id="credPassword" placeholder="Password">
+    </div>
+    <div>
+      <label for="credAccountNumber">Account Number</label>
+      <input type="text" id="credAccountNumber" placeholder="Account Number">
+    </div>
+    <div>
+      <label for="credAccountPin">Account PIN</label>
+      <input type="password" id="credAccountPin" placeholder="Account PIN">
+    </div>
+    <div>
+      <label for="credAccountEntity">Account Entity</label>
+      <input type="text" id="credAccountEntity" placeholder="Account Entity">
+    </div>
+    <div>
+      <label for="credAccountCountryCode">Account Country Code</label>
+      <select id="credAccountCountryCode">
+        <option value="">-- Load countries first --</option>
+      </select>
+    </div>
+  </div>
+  <button id="saveCredentialsBtn">Save Credentials</button>
+  <button id="editCredentialsBtn" style="display:none; background:#666; margin-left:10px;">Edit Credentials</button>
+  <div id="credStatusMsg" class="cred-status"></div>
+</div>
+
+<!-- ORIGIN ADDRESS SECTION -->
+<div class="container">
+  <h2>Origin Address</h2>
+  <div class="addr-grid">
+    <div>
+      <label for="originCountry">Country<span class="required-mark">*</span></label>
+      <select id="originCountry">
+        <option value="">-- Select Country --</option>
+      </select>
+    </div>
+    <div>
+      <label for="originCity">City<span class="required-mark">*</span></label>
+      <select id="originCity" disabled>
+        <option value="">-- Select a country first --</option>
+      </select>
+    </div>
+    <div class="full-width">
+      <label for="originLine1">Address Line 1<span class="required-mark">*</span></label>
+      <input type="text" id="originLine1" placeholder="Address Line 1">
+    </div>
+    <div>
+      <label for="originLine2">Address Line 2</label>
+      <input type="text" id="originLine2" placeholder="Address Line 2">
+    </div>
+    <div>
+      <label for="originLine3">Address Line 3</label>
+      <input type="text" id="originLine3" placeholder="Address Line 3">
+    </div>
+    <div>
+      <label for="originState">State or Province</label>
+      <select id="originState" disabled>
+        <option value="">-- Select a country first --</option>
+      </select>
+    </div>
+    <div>
+      <label for="originPostCode">Post Code</label>
+      <input type="text" id="originPostCode" placeholder="Post Code">
+    </div>
+    <div>
+      <label for="originBuildingNumber">Building Number</label>
+      <input type="text" id="originBuildingNumber" placeholder="Building Number">
+    </div>
+    <div>
+      <label for="originFloor">Floor</label>
+      <input type="text" id="originFloor" placeholder="Floor">
+    </div>
+    <div>
+      <label for="originApartment">Apartment</label>
+      <input type="text" id="originApartment" placeholder="Apartment">
+    </div>
+    <div class="full-width">
+      <label for="originDescription">Description</label>
+      <textarea id="originDescription" rows="2" placeholder="Description"></textarea>
+    </div>
+  </div>
+  <div id="originAddressStatus" class="address-status"></div>
+</div>
+
+<!-- DESTINATION ADDRESS SECTION -->
+<div class="container">
+  <h2>Destination Address</h2>
+  <div class="addr-grid">
+    <div>
+      <label for="destCountry">Country<span class="required-mark">*</span></label>
+      <select id="destCountry">
+        <option value="">-- Select Country --</option>
+      </select>
+    </div>
+    <div>
+      <label for="destCity">City<span class="required-mark">*</span></label>
+      <select id="destCity" disabled>
+        <option value="">-- Select a country first --</option>
+      </select>
+    </div>
+    <div class="full-width">
+      <label for="destLine1">Address Line 1<span class="required-mark">*</span></label>
+      <input type="text" id="destLine1" placeholder="Address Line 1">
+    </div>
+    <div>
+      <label for="destLine2">Address Line 2</label>
+      <input type="text" id="destLine2" placeholder="Address Line 2">
+    </div>
+    <div>
+      <label for="destLine3">Address Line 3</label>
+      <input type="text" id="destLine3" placeholder="Address Line 3">
+    </div>
+    <div>
+      <label for="destState">State or Province</label>
+      <select id="destState" disabled>
+        <option value="">-- Select a country first --</option>
+      </select>
+    </div>
+    <div>
+      <label for="destPostCode">Post Code</label>
+      <input type="text" id="destPostCode" placeholder="Post Code">
+    </div>
+    <div>
+      <label for="destBuildingNumber">Building Number</label>
+      <input type="text" id="destBuildingNumber" placeholder="Building Number">
+    </div>
+    <div>
+      <label for="destFloor">Floor</label>
+      <input type="text" id="destFloor" placeholder="Floor">
+    </div>
+    <div>
+      <label for="destApartment">Apartment</label>
+      <input type="text" id="destApartment" placeholder="Apartment">
+    </div>
+    <div class="full-width">
+      <label for="destDescription">Description</label>
+      <textarea id="destDescription" rows="2" placeholder="Description"></textarea>
+    </div>
+  </div>
+  <div id="destAddressStatus" class="address-status"></div>
+</div>
+
+<!-- SHIPMENT BOX & WEIGHT SECTION -->
+<div class="container">
+  <h2>Shipment Box & Weight Finder</h2>
+  <p style="color:#666; font-size:14px; margin-top:10px;">
+    Select how many items are in this shipment and enter each item's dimensions and weight.
+    This finds the smallest-free-space box that fits everything, and adds up the total
+    shipment weight for the rate calculation.
+  </p>
+
+  <div class="section">
+    <label for="shipmentItemCountSelect">Select the number of items in the shipment:</label>
+    <select id="shipmentItemCountSelect">
+      <option value="">-- Select number of items --</option>
+    </select>
+  </div>
+
+  <div id="shipmentItemRowsContainer"></div>
+
+  <div id="shipmentErrorBanner" class="error-banner">Please fill in all dimension and weight fields for every item before continuing.</div>
+
+  <button id="getShipmentBoxBtn" style="display:none;">Get Suitable Box & Total Weight</button>
+  <button id="resetShipmentItemsBtn" style="display:none; background:#666; margin-left:10px;">Reset</button>
+
+  <div id="shipmentBoxResult"></div>
+</div>
+
+<!-- CALCULATE RATE SECTION -->
+<div class="container">
+  <h2>Calculate Rate</h2>
+  <p style="color:#666; font-size:14px; margin-top:10px;">
+    Uses the Origin and Destination addresses above, plus the box and total weight from
+    the Shipment Box & Weight Finder, to get a shipping rate from Aramex.
+  </p>
+
+  <div class="addr-grid">
+    <div>
+      <label for="ratePreferredCurrency">Preferred Currency Code</label>
+      <select id="ratePreferredCurrency">
+        <option value="JOD">JOD (Jordanian Dinar)</option>
+        <option value="USD">USD (US Dollar)</option>
+      </select>
+    </div>
+    <div>
+      <label for="rateProductType">Product Type<span class="required-mark">*</span></label>
+      <select id="rateProductType">
+        <option value="">-- Select Product Type --</option>
+      </select>
+    </div>
+  </div>
+
+  <p style="color:#666; font-size:13px; margin-top:4px;">
+    Product Group is set automatically: <strong>DOM</strong> if Origin and Destination are the
+    same country, <strong>EXP</strong> if they differ — currently: <strong id="rateProductGroupLabel">-- select both addresses --</strong>.
+    The Product Type list above updates to match. Payment Type is fixed as <strong>P</strong>
+    (prepaid). Dimensions and Actual Weight come from the box calculated in Shipment Box &amp;
+    Weight Finder above.
+  </p>
+
+  <button id="getRateBtn">Get Shipping Rate</button>
+  <div id="rateStatus" class="address-status"></div>
+  <div id="rateResult"></div>
+</div>
+
+<!-- SECTION 2 -->
+<div class="container">
+  <h2>Smart Box Finder</h2>
+  <p style="color:#666; font-size:14px; margin-top:10px;">
+    Select how many items you want to pack, enter each item's dimensions, and this tool will
+    run a 3D packing simulation across every Class A and Class B box to find the smallest box
+    (or combination check) that fits all items with the least amount of free space.
+  </p>
+
+  <div class="section">
+    <label for="itemCountSelect">Select the number of items inside the box:</label>
+    <select id="itemCountSelect">
+      <option value="">-- Select number of items --</option>
+    </select>
+  </div>
+
+  <div id="itemRowsContainer"></div>
+
+  <div id="errorBanner" class="error-banner">Please fill in all dimension fields (Length, Width, Height) for every item before continuing.</div>
+
+  <button id="getSuitableBoxBtn" style="display:none;">Get the suitable box</button>
+  <button id="resetItemsBtn" style="display:none; background:#666; margin-left:10px;">Reset</button>
+  <button id="calculateRateBtn" style="display:none; background:#2b6cb0; margin-left:10px;">Send to Calculate Rate</button>
+
+  <div id="suitableBoxResult"></div>
+</div>
+
+<!-- SECTION 1 -->
+<div class="container">
+  <h1>Aramex Box Class Selector</h1>
+  <div class="section">
+    <label for="classSelect">Please select the box class to view the boxes:</label>
+    <select id="classSelect">
+      <option value="" selected>-- Select the Box Class --</option>
+      <option value="all">Select All</option>
+      <option value="A">Class A</option>
+      <option value="B">Class B</option>
+    </select>
+    <button id="getBoxesBtn">Get Boxes</button>
+  </div>
+  <div id="resultArea"></div>
+</div>
+
+<script>
+
+  /* ---------- CREDENTIALS SECTION ---------- */
+const STATIC_COUNTRY_LIST = [
+    { Code: "AF", Name: "Afghanistan" },
+    { Code: "AX", Name: "Aland Islands" },
+    { Code: "AL", Name: "Albania" },
+    { Code: "DZ", Name: "Algeria" },
+    { Code: "AS", Name: "American Samoa" },
+    { Code: "AD", Name: "Andorra" },
+    { Code: "AO", Name: "Angola" },
+    { Code: "AI", Name: "Anguilla" },
+    { Code: "AQ", Name: "Antarctica" },
+    { Code: "AG", Name: "Antigua and Barbuda" },
+    { Code: "AR", Name: "Argentina" },
+    { Code: "AM", Name: "Armenia" },
+    { Code: "AW", Name: "Aruba" },
+    { Code: "AU", Name: "Australia" },
+    { Code: "AT", Name: "Austria" },
+    { Code: "AZ", Name: "Azerbaijan" },
+    { Code: "BS", Name: "Bahamas" },
+    { Code: "BH", Name: "Bahrain" },
+    { Code: "BD", Name: "Bangladesh" },
+    { Code: "BB", Name: "Barbados" },
+    { Code: "BY", Name: "Belarus" },
+    { Code: "BE", Name: "Belgium" },
+    { Code: "BZ", Name: "Belize" },
+    { Code: "BJ", Name: "Benin" },
+    { Code: "BM", Name: "Bermuda" },
+    { Code: "BT", Name: "Bhutan" },
+    { Code: "BO", Name: "Bolivia" },
+    { Code: "BA", Name: "Bosnia and Herzegovina" },
+    { Code: "BW", Name: "Botswana" },
+    { Code: "BR", Name: "Brazil" },
+    { Code: "IO", Name: "British Indian Ocean Territory" },
+    { Code: "BN", Name: "Brunei Darussalam" },
+    { Code: "BG", Name: "Bulgaria" },
+    { Code: "BF", Name: "Burkina Faso" },
+    { Code: "BI", Name: "Burundi" },
+    { Code: "KH", Name: "Cambodia" },
+    { Code: "CM", Name: "Cameroon" },
+    { Code: "CA", Name: "Canada" },
+    { Code: "CV", Name: "Cabo Verde" },
+    { Code: "KY", Name: "Cayman Islands" },
+    { Code: "CF", Name: "Central African Republic" },
+    { Code: "TD", Name: "Chad" },
+    { Code: "CL", Name: "Chile" },
+    { Code: "CN", Name: "China" },
+    { Code: "CX", Name: "Christmas Island" },
+    { Code: "CC", Name: "Cocos (Keeling) Islands" },
+    { Code: "CO", Name: "Colombia" },
+    { Code: "KM", Name: "Comoros" },
+    { Code: "CG", Name: "Congo" },
+    { Code: "CD", Name: "Congo, Democratic Republic of the" },
+    { Code: "CK", Name: "Cook Islands" },
+    { Code: "CR", Name: "Costa Rica" },
+    { Code: "CI", Name: "Cote d'Ivoire" },
+    { Code: "HR", Name: "Croatia" },
+    { Code: "CU", Name: "Cuba" },
+    { Code: "CW", Name: "Curacao" },
+    { Code: "CY", Name: "Cyprus" },
+    { Code: "CZ", Name: "Czechia" },
+    { Code: "DK", Name: "Denmark" },
+    { Code: "DJ", Name: "Djibouti" },
+    { Code: "DM", Name: "Dominica" },
+    { Code: "DO", Name: "Dominican Republic" },
+    { Code: "EC", Name: "Ecuador" },
+    { Code: "EG", Name: "Egypt" },
+    { Code: "SV", Name: "El Salvador" },
+    { Code: "GQ", Name: "Equatorial Guinea" },
+    { Code: "ER", Name: "Eritrea" },
+    { Code: "EE", Name: "Estonia" },
+    { Code: "SZ", Name: "Eswatini" },
+    { Code: "ET", Name: "Ethiopia" },
+    { Code: "FK", Name: "Falkland Islands" },
+    { Code: "FO", Name: "Faroe Islands" },
+    { Code: "FJ", Name: "Fiji" },
+    { Code: "FI", Name: "Finland" },
+    { Code: "FR", Name: "France" },
+    { Code: "GF", Name: "French Guiana" },
+    { Code: "PF", Name: "French Polynesia" },
+    { Code: "TF", Name: "French Southern Territories" },
+    { Code: "GA", Name: "Gabon" },
+    { Code: "GM", Name: "Gambia" },
+    { Code: "GE", Name: "Georgia" },
+    { Code: "DE", Name: "Germany" },
+    { Code: "GH", Name: "Ghana" },
+    { Code: "GI", Name: "Gibraltar" },
+    { Code: "GR", Name: "Greece" },
+    { Code: "GL", Name: "Greenland" },
+    { Code: "GD", Name: "Grenada" },
+    { Code: "GP", Name: "Guadeloupe" },
+    { Code: "GU", Name: "Guam" },
+    { Code: "GT", Name: "Guatemala" },
+    { Code: "GG", Name: "Guernsey" },
+    { Code: "GN", Name: "Guinea" },
+    { Code: "GW", Name: "Guinea-Bissau" },
+    { Code: "GY", Name: "Guyana" },
+    { Code: "HT", Name: "Haiti" },
+    { Code: "VA", Name: "Holy See" },
+    { Code: "HN", Name: "Honduras" },
+    { Code: "HK", Name: "Hong Kong" },
+    { Code: "HU", Name: "Hungary" },
+    { Code: "IS", Name: "Iceland" },
+    { Code: "IN", Name: "India" },
+    { Code: "ID", Name: "Indonesia" },
+    { Code: "IR", Name: "Iran" },
+    { Code: "IQ", Name: "Iraq" },
+    { Code: "IE", Name: "Ireland" },
+    { Code: "IM", Name: "Isle of Man" },
+    { Code: "IL", Name: "Israel" },
+    { Code: "IT", Name: "Italy" },
+    { Code: "JM", Name: "Jamaica" },
+    { Code: "JP", Name: "Japan" },
+    { Code: "JE", Name: "Jersey" },
+    { Code: "JO", Name: "Jordan" },
+    { Code: "KZ", Name: "Kazakhstan" },
+    { Code: "KE", Name: "Kenya" },
+    { Code: "KI", Name: "Kiribati" },
+    { Code: "KP", Name: "Korea (North)" },
+    { Code: "KR", Name: "Korea (South)" },
+    { Code: "KW", Name: "Kuwait" },
+    { Code: "KG", Name: "Kyrgyzstan" },
+    { Code: "LA", Name: "Laos" },
+    { Code: "LV", Name: "Latvia" },
+    { Code: "LB", Name: "Lebanon" },
+    { Code: "LS", Name: "Lesotho" },
+    { Code: "LR", Name: "Liberia" },
+    { Code: "LY", Name: "Libya" },
+    { Code: "LI", Name: "Liechtenstein" },
+    { Code: "LT", Name: "Lithuania" },
+    { Code: "LU", Name: "Luxembourg" },
+    { Code: "MO", Name: "Macao" },
+    { Code: "MG", Name: "Madagascar" },
+    { Code: "MW", Name: "Malawi" },
+    { Code: "MY", Name: "Malaysia" },
+    { Code: "MV", Name: "Maldives" },
+    { Code: "ML", Name: "Mali" },
+    { Code: "MT", Name: "Malta" },
+    { Code: "MH", Name: "Marshall Islands" },
+    { Code: "MQ", Name: "Martinique" },
+    { Code: "MR", Name: "Mauritania" },
+    { Code: "MU", Name: "Mauritius" },
+    { Code: "YT", Name: "Mayotte" },
+    { Code: "MX", Name: "Mexico" },
+    { Code: "FM", Name: "Micronesia" },
+    { Code: "MD", Name: "Moldova" },
+    { Code: "MC", Name: "Monaco" },
+    { Code: "MN", Name: "Mongolia" },
+    { Code: "ME", Name: "Montenegro" },
+    { Code: "MS", Name: "Montserrat" },
+    { Code: "MA", Name: "Morocco" },
+    { Code: "MZ", Name: "Mozambique" },
+    { Code: "MM", Name: "Myanmar" },
+    { Code: "NA", Name: "Namibia" },
+    { Code: "NR", Name: "Nauru" },
+    { Code: "NP", Name: "Nepal" },
+    { Code: "NL", Name: "Netherlands" },
+    { Code: "NC", Name: "New Caledonia" },
+    { Code: "NZ", Name: "New Zealand" },
+    { Code: "NI", Name: "Nicaragua" },
+    { Code: "NE", Name: "Niger" },
+    { Code: "NG", Name: "Nigeria" },
+    { Code: "NU", Name: "Niue" },
+    { Code: "NF", Name: "Norfolk Island" },
+    { Code: "MK", Name: "North Macedonia" },
+    { Code: "MP", Name: "Northern Mariana Islands" },
+    { Code: "NO", Name: "Norway" },
+    { Code: "OM", Name: "Oman" },
+    { Code: "PK", Name: "Pakistan" },
+    { Code: "PW", Name: "Palau" },
+    { Code: "PS", Name: "Palestine, State of" },
+    { Code: "PA", Name: "Panama" },
+    { Code: "PG", Name: "Papua New Guinea" },
+    { Code: "PY", Name: "Paraguay" },
+    { Code: "PE", Name: "Peru" },
+    { Code: "PH", Name: "Philippines" },
+    { Code: "PN", Name: "Pitcairn" },
+    { Code: "PL", Name: "Poland" },
+    { Code: "PT", Name: "Portugal" },
+    { Code: "PR", Name: "Puerto Rico" },
+    { Code: "QA", Name: "Qatar" },
+    { Code: "RE", Name: "Reunion" },
+    { Code: "RO", Name: "Romania" },
+    { Code: "RU", Name: "Russian Federation" },
+    { Code: "RW", Name: "Rwanda" },
+    { Code: "BL", Name: "Saint Barthelemy" },
+    { Code: "SH", Name: "Saint Helena" },
+    { Code: "KN", Name: "Saint Kitts and Nevis" },
+    { Code: "LC", Name: "Saint Lucia" },
+    { Code: "MF", Name: "Saint Martin" },
+    { Code: "PM", Name: "Saint Pierre and Miquelon" },
+    { Code: "VC", Name: "Saint Vincent and the Grenadines" },
+    { Code: "WS", Name: "Samoa" },
+    { Code: "SM", Name: "San Marino" },
+    { Code: "ST", Name: "Sao Tome and Principe" },
+    { Code: "SA", Name: "Saudi Arabia" },
+    { Code: "SN", Name: "Senegal" },
+    { Code: "RS", Name: "Serbia" },
+    { Code: "SC", Name: "Seychelles" },
+    { Code: "SL", Name: "Sierra Leone" },
+    { Code: "SG", Name: "Singapore" },
+    { Code: "SX", Name: "Sint Maarten" },
+    { Code: "SK", Name: "Slovakia" },
+    { Code: "SI", Name: "Slovenia" },
+    { Code: "SB", Name: "Solomon Islands" },
+    { Code: "SO", Name: "Somalia" },
+    { Code: "ZA", Name: "South Africa" },
+    { Code: "GS", Name: "South Georgia" },
+    { Code: "SS", Name: "South Sudan" },
+    { Code: "ES", Name: "Spain" },
+    { Code: "LK", Name: "Sri Lanka" },
+    { Code: "SD", Name: "Sudan" },
+    { Code: "SR", Name: "Suriname" },
+    { Code: "SJ", Name: "Svalbard and Jan Mayen" },
+    { Code: "SE", Name: "Sweden" },
+    { Code: "CH", Name: "Switzerland" },
+    { Code: "SY", Name: "Syrian Arab Republic" },
+    { Code: "TW", Name: "Taiwan" },
+    { Code: "TJ", Name: "Tajikistan" },
+    { Code: "TZ", Name: "Tanzania" },
+    { Code: "TH", Name: "Thailand" },
+    { Code: "TL", Name: "Timor-Leste" },
+    { Code: "TG", Name: "Togo" },
+    { Code: "TK", Name: "Tokelau" },
+    { Code: "TO", Name: "Tonga" },
+    { Code: "TT", Name: "Trinidad and Tobago" },
+    { Code: "TN", Name: "Tunisia" },
+    { Code: "TR", Name: "Turkey" },
+    { Code: "TM", Name: "Turkmenistan" },
+    { Code: "TC", Name: "Turks and Caicos Islands" },
+    { Code: "TV", Name: "Tuvalu" },
+    { Code: "UG", Name: "Uganda" },
+    { Code: "UA", Name: "Ukraine" },
+    { Code: "AE", Name: "United Arab Emirates" },
+    { Code: "GB", Name: "United Kingdom" },
+    { Code: "US", Name: "United States" },
+    { Code: "UM", Name: "United States Minor Outlying Islands" },
+    { Code: "UY", Name: "Uruguay" },
+    { Code: "UZ", Name: "Uzbekistan" },
+    { Code: "VU", Name: "Vanuatu" },
+    { Code: "VE", Name: "Venezuela" },
+    { Code: "VN", Name: "Viet Nam" },
+    { Code: "VG", Name: "Virgin Islands (British)" },
+    { Code: "VI", Name: "Virgin Islands (U.S.)" },
+    { Code: "WF", Name: "Wallis and Futuna" },
+    { Code: "EH", Name: "Western Sahara" },
+    { Code: "YE", Name: "Yemen" },
+    { Code: "ZM", Name: "Zambia" },
+    { Code: "ZW", Name: "Zimbabwe" }
+  ];
+
+  function populateCountryDropdown(list, sourceLabel) {
+    const countrySelect = document.getElementById('credAccountCountryCode');
+    countrySelect.innerHTML = '<option value="">-- Select Country --</option>';
+    list.forEach(country => {
+      const opt = document.createElement('option');
+      opt.value = country.Code;
+      opt.textContent = country.Name;
+      countrySelect.appendChild(opt);
+    });
+  }
+
+  // Auto-populate immediately on page load using the built-in country list —
+  // no button click or API call required.
+  document.addEventListener('DOMContentLoaded', () => {
+    populateCountryDropdown(STATIC_COUNTRY_LIST, "built-in list");
+  });
+  const FETCH_COUNTRIES_URL = "https://ws.aramex.net/ShippingAPI.V2/Location/Service_1_0.svc/json/FetchCountries";
+
+  // Shared credentials object other sections (Rate Calculator, States, Cities) will read from
+  window.aramexCredentials = {
+    UserName: "", Password: "", AccountNumber: "", AccountPin: "",
+    AccountEntity: "", AccountCountryCode: "", Version: "v1", Source: 24
+  };
+
+  function readCredentialFields() {
+    window.aramexCredentials.UserName = document.getElementById('credUsername').value.trim();
+    window.aramexCredentials.Password = document.getElementById('credPassword').value;
+    window.aramexCredentials.AccountNumber = document.getElementById('credAccountNumber').value.trim();
+    window.aramexCredentials.AccountPin = document.getElementById('credAccountPin').value.trim();
+    window.aramexCredentials.AccountEntity = document.getElementById('credAccountEntity').value.trim();
+  }
+
+
+  document.getElementById('credAccountCountryCode').addEventListener('change', (e) => {
+    window.aramexCredentials.AccountCountryCode = e.target.value;
+  });
+
+  const CRED_FIELD_IDS = ['credUsername', 'credPassword', 'credAccountNumber', 'credAccountPin', 'credAccountEntity', 'credAccountCountryCode'];
+  const CRED_STORAGE_KEY = 'aramexCredentialsSaved';
+
+  function setCredentialFieldsLocked(locked) {
+    CRED_FIELD_IDS.forEach(id => { document.getElementById(id).disabled = locked; });
+    document.getElementById('saveCredentialsBtn').style.display = locked ? 'none' : 'inline-block';
+    document.getElementById('editCredentialsBtn').style.display = locked ? 'inline-block' : 'none';
+  }
+
+  document.getElementById('saveCredentialsBtn').addEventListener('click', () => {
+    readCredentialFields();
+    const c = window.aramexCredentials;
+    const statusEl = document.getElementById('credStatusMsg');
+
+    if (!c.UserName || !c.Password || !c.AccountNumber || !c.AccountPin || !c.AccountEntity || !c.AccountCountryCode) {
+      statusEl.textContent = "Please fill in every field, including Account Country Code, before saving.";
+      statusEl.className = "cred-status error";
+      return;
+    }
+
+    // Persist locally in the browser so the credentials survive a page reload
+    localStorage.setItem(CRED_STORAGE_KEY, JSON.stringify(c));
+
+    setCredentialFieldsLocked(true);
+    statusEl.textContent = "Credentials saved. Every API call on this page (Cities, States, Rate Calculator) will now use them automatically.";
+    statusEl.className = "cred-status success";
+  });
+
+  document.getElementById('editCredentialsBtn').addEventListener('click', () => {
+    setCredentialFieldsLocked(false);
+    document.getElementById('credStatusMsg').textContent = "";
+    document.getElementById('credStatusMsg').className = "cred-status";
+  });
+
+  // Restore previously saved credentials (if any) when the page loads
+  document.addEventListener('DOMContentLoaded', () => {
+    const saved = localStorage.getItem(CRED_STORAGE_KEY);
+    if (!saved) return;
+    try {
+      const c = JSON.parse(saved);
+      document.getElementById('credUsername').value = c.UserName || '';
+      document.getElementById('credPassword').value = c.Password || '';
+      document.getElementById('credAccountNumber').value = c.AccountNumber || '';
+      document.getElementById('credAccountPin').value = c.AccountPin || '';
+      document.getElementById('credAccountEntity').value = c.AccountEntity || '';
+      window.aramexCredentials = Object.assign(window.aramexCredentials, c);
+      // Country dropdown is populated by the other DOMContentLoaded listener;
+      // set its value once options exist.
+      setTimeout(() => {
+        document.getElementById('credAccountCountryCode').value = c.AccountCountryCode || '';
+      }, 0);
+      setCredentialFieldsLocked(true);
+      const statusEl = document.getElementById('credStatusMsg');
+      statusEl.textContent = "Loaded previously saved credentials.";
+      statusEl.className = "cred-status success";
+    } catch (e) {
+      // ignore corrupted storage
+    }
+  });
+
+
+  /* ---------- SECTION 1: Box generation ---------- */
+  function generateClassA() {
+    const boxes = [];
+    let id = 1;
+    for (let dim = 10; dim <= 100; dim += 5) {
+      boxes.push({ code: "A-" + String(id).padStart(2, "0"), cls: "A", L: dim, W: dim, H: dim });
+      id++;
+    }
+    return boxes;
+  }
+
+  function generateClassB() {
+    const boxes = [];
+    let id = 1;
+    let L = 20, WH = 10;
+    while (L <= 150 && WH <= 75) {
+      boxes.push({ code: "B-" + String(id).padStart(2, "0"), cls: "B", L: L, W: WH, H: WH });
+      id++;
+      L += 10;
+      WH += 5;
+    }
+    return boxes;
+  }
+
+  const classABoxes = generateClassA();
+  const classBBoxes = generateClassB();
+  const allBoxes = [...classABoxes, ...classBBoxes];
+
+  function renderTable(boxes) {
+    const resultArea = document.getElementById("resultArea");
+    if (boxes.length === 0) {
+      resultArea.innerHTML = '<div class="empty-msg">No boxes to display.</div>';
+      return;
+    }
+    let html = '<table><thead><tr>' +
+      '<th>Code</th><th>Class</th><th>Length (cm)</th><th>Width (cm)</th><th>Height (cm)</th>' +
+      '</tr></thead><tbody>';
+    boxes.forEach(b => {
+      const tagClass = b.cls === "A" ? "tag-a" : "tag-b";
+      html += `<tr>
+        <td>${b.code}</td>
+        <td><span class="class-tag ${tagClass}">Class ${b.cls}</span></td>
+        <td>${b.L}</td>
+        <td>${b.W}</td>
+        <td>${b.H}</td>
+      </tr>`;
+    });
+    html += '</tbody></table>';
+    html += `<div class="count">${boxes.length} box(es) shown</div>`;
+    resultArea.innerHTML = html;
+  }
+
+  document.getElementById("classSelect").addEventListener("change", (e) => {
+    if (!e.target.value) {
+      document.getElementById("resultArea").innerHTML = "";
+    }
+  });
+
+  document.getElementById("getBoxesBtn").addEventListener("click", () => {
+    const selected = document.getElementById("classSelect").value;
+    const resultArea = document.getElementById("resultArea");
+
+    if (!selected) {
+      resultArea.innerHTML = '<div class="empty-msg">Please select the box class to view the boxes.</div>';
+      return;
+    }
+
+    let boxes = [];
+    if (selected === "all") boxes = [...classABoxes, ...classBBoxes];
+    else if (selected === "A") boxes = classABoxes;
+    else if (selected === "B") boxes = classBBoxes;
+    renderTable(boxes);
+  });
+
+  /* ---------- ADDRESS SECTIONS (Origin / Destination) ---------- */
+
+  // Routed through a tiny local proxy (proxy.js) because Aramex's API
+  // doesn't send CORS headers, so the browser blocks direct calls to it.
+  // Run: node proxy.js — then use this page as normal.
+  const FETCH_CITIES_URL = "http://localhost:3001/api/fetch-cities";
+  const FETCH_STATES_URL = "http://localhost:3001/api/fetch-states";
+
+  function buildClientInfo(creds) {
+    return {
+      UserName: creds.UserName,
+      Password: creds.Password,
+      Version: "v1",
+      AccountNumber: creds.AccountNumber,
+      AccountPin: creds.AccountPin,
+      AccountEntity: creds.AccountEntity,
+      AccountCountryCode: creds.AccountCountryCode || "JO",
+      Source: 24
+    };
+  }
+
+  async function fetchCities(countryCode, creds) {
+    const payload = {
+      ClientInfo: buildClientInfo(creds),
+      CountryCode: countryCode,
+      NameStartsWith: "",
+      State: "",
+      Transaction: { Reference1: "", Reference2: "", Reference3: "", Reference4: "", Reference5: "" }
+    };
+    const res = await fetch(FETCH_CITIES_URL, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(payload)
+    });
+    return res.json();
+  }
+
+  async function fetchStates(countryCode, creds) {
+    const payload = {
+      ClientInfo: buildClientInfo(creds),
+      CountryCode: countryCode,
+      Transaction: { Reference1: "", Reference2: "", Reference3: "", Reference4: "", Reference5: "" }
+    };
+    const res = await fetch(FETCH_STATES_URL, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(payload)
+    });
+    return res.json();
+  }
+
+  // Collects one address section's fields into the object shape CalculateRate expects
+  function collectAddressData(prefix) {
+    return {
+      Line1: document.getElementById(prefix + 'Line1').value.trim(),
+      Line2: document.getElementById(prefix + 'Line2').value.trim(),
+      Line3: document.getElementById(prefix + 'Line3').value.trim(),
+      City: document.getElementById(prefix + 'City').value,
+      StateOrProvinceCode: document.getElementById(prefix + 'State').value,
+      PostCode: document.getElementById(prefix + 'PostCode').value.trim(),
+      CountryCode: document.getElementById(prefix + 'Country').value,
+      Longitude: 0,
+      Latitude: 0,
+      BuildingNumber: document.getElementById(prefix + 'BuildingNumber').value.trim() || null,
+      BuildingName: null,
+      Floor: document.getElementById(prefix + 'Floor').value.trim() || null,
+      Apartment: document.getElementById(prefix + 'Apartment').value.trim() || null,
+      POBox: null,
+      Description: document.getElementById(prefix + 'Description').value.trim() || null
+    };
+  }
+
+  function populateSelect(selectEl, items, valueKey, textKey, placeholder) {
+    selectEl.innerHTML = `<option value="">${placeholder}</option>`;
+    items.forEach(item => {
+      const opt = document.createElement('option');
+      opt.value = valueKey ? item[valueKey] : item;
+      opt.textContent = textKey ? item[textKey] : item;
+      selectEl.appendChild(opt);
+    });
+  }
+
+  function initAddressSection(prefix) {
+    const countrySelect = document.getElementById(prefix + 'Country');
+    const citySelect = document.getElementById(prefix + 'City');
+    const stateSelect = document.getElementById(prefix + 'State');
+    const statusEl = document.getElementById(prefix + 'AddressStatus');
+
+    countrySelect.innerHTML = '<option value="">-- Select Country --</option>';
+    STATIC_COUNTRY_LIST.forEach(country => {
+      const opt = document.createElement('option');
+      opt.value = country.Code;
+      opt.textContent = country.Name;
+      countrySelect.appendChild(opt);
+    });
+
+    countrySelect.addEventListener('change', async () => {
+      const code = countrySelect.value;
+
+      citySelect.innerHTML = '<option value="">-- Select a country first --</option>';
+      citySelect.disabled = true;
+      stateSelect.innerHTML = '<option value="">-- Select a country first --</option>';
+      stateSelect.disabled = true;
+      if (statusEl) { statusEl.textContent = ""; statusEl.className = "address-status"; }
+
+      if (!code) return;
+
+      const creds = window.aramexCredentials;
+      if (!creds.UserName || !creds.Password || !creds.AccountNumber || !creds.AccountPin || !creds.AccountEntity) {
+        if (statusEl) {
+          statusEl.textContent = "Please fill in and save the Aramex API Credentials section above first.";
+          statusEl.className = "address-status error";
+        }
+        return;
+      }
+
+      citySelect.innerHTML = '<option value="">-- Loading... --</option>';
+      stateSelect.innerHTML = '<option value="">-- Loading... --</option>';
+      if (statusEl) { statusEl.textContent = "Loading cities and states..."; statusEl.className = "address-status loading"; }
+
+      try {
+        const [citiesRes, statesRes] = await Promise.all([
+          fetchCities(code, creds),
+          fetchStates(code, creds)
+        ]);
+
+        const errorMessages = [];
+
+        if (citiesRes && citiesRes.HasErrors) {
+          const msg = (citiesRes.Notifications && citiesRes.Notifications.length)
+            ? citiesRes.Notifications.map(n => n.Message).join('; ') : 'Unknown error';
+          errorMessages.push('Cities: ' + msg);
+          citySelect.innerHTML = '<option value="">-- Error loading cities --</option>';
+        } else if (citiesRes && citiesRes.Cities && citiesRes.Cities.length) {
+          populateSelect(citySelect, citiesRes.Cities, null, null, '-- Select City --');
+          citySelect.disabled = false;
+        } else {
+          citySelect.innerHTML = '<option value="">-- No cities returned --</option>';
+        }
+
+        if (statesRes && statesRes.HasErrors) {
+          const msg = (statesRes.Notifications && statesRes.Notifications.length)
+            ? statesRes.Notifications.map(n => n.Message).join('; ') : 'Unknown error';
+          errorMessages.push('States: ' + msg);
+          stateSelect.innerHTML = '<option value="">-- Error loading states --</option>';
+        } else if (statesRes && statesRes.States && statesRes.States.length) {
+          populateSelect(stateSelect, statesRes.States, 'Code', 'Name', '-- Select State/Province --');
+          stateSelect.disabled = false;
+        } else {
+          stateSelect.innerHTML = '<option value="">-- Not applicable for this country --</option>';
+        }
+
+        if (statusEl) {
+          if (errorMessages.length) {
+            statusEl.textContent = errorMessages.join(' | ');
+            statusEl.className = "address-status error";
+          } else {
+            statusEl.textContent = "";
+            statusEl.className = "address-status";
+          }
+        }
+      } catch (err) {
+        citySelect.innerHTML = '<option value="">-- Could not load --</option>';
+        stateSelect.innerHTML = '<option value="">-- Could not load --</option>';
+        if (statusEl) {
+          statusEl.textContent = "Could not reach the local proxy (http://localhost:3001). Make sure it's running: node proxy.js. " + err.message;
+          statusEl.className = "address-status error";
+        }
+      }
+    });
+  }
+
+  document.addEventListener('DOMContentLoaded', () => {
+    initAddressSection('origin');
+    initAddressSection('dest');
+  });
+
+  /* ---------- SECTION 2: Smart box finder ---------- */
+
+  // populate item count dropdown 1-30
+  const itemCountSelect = document.getElementById("itemCountSelect");
+  for (let i = 1; i <= 30; i++) {
+    const opt = document.createElement("option");
+    opt.value = i;
+    opt.textContent = i;
+    itemCountSelect.appendChild(opt);
+  }
+
+  const itemRowsContainer = document.getElementById("itemRowsContainer");
+  const getSuitableBoxBtn = document.getElementById("getSuitableBoxBtn");
+  const resetItemsBtn = document.getElementById("resetItemsBtn");
+  const calculateRateBtn = document.getElementById("calculateRateBtn");
+  const errorBanner = document.getElementById("errorBanner");
+  const suitableBoxResult = document.getElementById("suitableBoxResult");
+
+  itemCountSelect.addEventListener("change", () => {
+    const n = parseInt(itemCountSelect.value, 10) || 0;
+    suitableBoxResult.innerHTML = "";
+    errorBanner.style.display = "none";
+
+    if (!n) {
+      itemRowsContainer.innerHTML = "";
+      getSuitableBoxBtn.style.display = "none";
+      resetItemsBtn.style.display = "none";
+      calculateRateBtn.style.display = "none";
+      return;
+    }
+
+    let header = itemRowsContainer.querySelector(".dim-header");
+    if (!header) {
+      header = document.createElement("div");
+      header.className = "dim-header";
+      header.innerHTML = "<div>Item</div><div>Length (cm)</div><div>Width (cm)</div><div>Height (cm)</div>";
+      itemRowsContainer.appendChild(header);
+    }
+
+    const existingRows = itemRowsContainer.querySelectorAll(".item-row");
+    const currentCount = existingRows.length;
+
+    if (n > currentCount) {
+      for (let i = currentCount + 1; i <= n; i++) {
+        const row = document.createElement("div");
+        row.className = "item-row";
+        row.innerHTML = `
+          <div class="item-label">Item ${i}</div>
+          <input type="number" min="0.1" step="0.1" class="dim-input" data-item="${i}" data-dim="L" placeholder="Length">
+          <input type="number" min="0.1" step="0.1" class="dim-input" data-item="${i}" data-dim="W" placeholder="Width">
+          <input type="number" min="0.1" step="0.1" class="dim-input" data-item="${i}" data-dim="H" placeholder="Height">
+        `;
+        itemRowsContainer.appendChild(row);
+      }
+    } else if (n < currentCount) {
+      for (let i = currentCount; i > n; i--) {
+        existingRows[i - 1].remove();
+      }
+    }
+
+    getSuitableBoxBtn.style.display = "inline-block";
+    resetItemsBtn.style.display = "inline-block";
+    calculateRateBtn.style.display = "inline-block";
+  });
+
+  function validateInputs() {
+    const inputs = itemRowsContainer.querySelectorAll(".dim-input");
+    let valid = true;
+    inputs.forEach(inp => {
+      const val = parseFloat(inp.value);
+      if (!inp.value || isNaN(val) || val <= 0) {
+        inp.classList.add("input-error");
+        valid = false;
+      } else {
+        inp.classList.remove("input-error");
+      }
+    });
+    return valid;
+  }
+
+  function collectItems() {
+    const n = parseInt(itemCountSelect.value, 10);
+    const items = [];
+    for (let i = 1; i <= n; i++) {
+      const L = parseFloat(itemRowsContainer.querySelector(`.dim-input[data-item="${i}"][data-dim="L"]`).value);
+      const W = parseFloat(itemRowsContainer.querySelector(`.dim-input[data-item="${i}"][data-dim="W"]`).value);
+      const H = parseFloat(itemRowsContainer.querySelector(`.dim-input[data-item="${i}"][data-dim="H"]`).value);
+      items.push({ L, W, H });
+    }
+    return items;
+  }
+
+  // Return the 6 axis-aligned orientations of an item's dimensions
+  function getOrientations(l, w, h) {
+    return [
+      [l, w, h], [l, h, w],
+      [w, l, h], [w, h, l],
+      [h, l, w], [h, w, l]
+    ];
+  }
+
+  // Attempt to pack all items into a given box using a guillotine best-fit
+  // 3D bin-packing heuristic. Returns true if every item can be placed.
+  function tryPackItems(items, box) {
+    let spaces = [{ x: 0, y: 0, z: 0, l: box.L, w: box.W, h: box.H }];
+    const sorted = items.slice().sort((a, b) => (b.L * b.W * b.H) - (a.L * a.W * a.H));
+
+    for (const item of sorted) {
+      let bestSpaceIdx = -1;
+      let bestOrientation = null;
+      let bestLeftover = Infinity;
+
+      for (let i = 0; i < spaces.length; i++) {
+        const space = spaces[i];
+        const orientations = getOrientations(item.L, item.W, item.H);
+        for (const [dl, dw, dh] of orientations) {
+          if (dl <= space.l + 1e-9 && dw <= space.w + 1e-9 && dh <= space.h + 1e-9) {
+            const leftover = (space.l * space.w * space.h) - (dl * dw * dh);
+            if (leftover < bestLeftover) {
+              bestLeftover = leftover;
+              bestSpaceIdx = i;
+              bestOrientation = [dl, dw, dh];
+            }
+          }
+        }
+      }
+
+      if (bestSpaceIdx === -1) return false; // item can't fit anywhere -> box fails
+
+      const space = spaces[bestSpaceIdx];
+      const [dl, dw, dh] = bestOrientation;
+      spaces.splice(bestSpaceIdx, 1);
+
+      // guillotine split into up to 3 remaining sub-spaces
+      if (space.l - dl > 1e-9) spaces.push({ x: space.x + dl, y: space.y, z: space.z, l: space.l - dl, w: space.w, h: space.h });
+      if (space.w - dw > 1e-9) spaces.push({ x: space.x, y: space.y + dw, z: space.z, l: dl, w: space.w - dw, h: space.h });
+      if (space.h - dh > 1e-9) spaces.push({ x: space.x, y: space.y, z: space.z + dh, l: dl, w: dw, h: space.h - dh });
+    }
+    return true;
+  }
+
+  // Find the smallest-volume box (from Class A + Class B) that can physically
+  // fit all items, using the packing simulation above.
+  function findBestBox(items) {
+    const totalItemVolume = items.reduce((s, it) => s + it.L * it.W * it.H, 0);
+    const candidates = allBoxes
+      .map(b => ({ ...b, volume: b.L * b.W * b.H }))
+      .filter(b => b.volume >= totalItemVolume)
+      .sort((a, b) => a.volume - b.volume);
+
+    for (const box of candidates) {
+      if (tryPackItems(items, box)) {
+        return { box, freeSpace: box.volume - totalItemVolume, totalItemVolume };
+      }
+    }
+    return null;
+  }
+
+  function renderSuitableBoxResult(items) {
+    const result = findBestBox(items);
+
+    if (!result) {
+      suitableBoxResult.innerHTML = `
+        <div class="result-box fail">
+          <div class="big-code" style="color:var(--err);">No suitable box found</div>
+          <p style="margin-top:10px; color:#666;">
+            None of the available Class A or Class B boxes can fit these items together
+            (either the combined volume or the individual item dimensions exceed the largest
+            available box: A-19 (100×100×100) or B-14 (150×75×75)).
+          </p>
+        </div>`;
+      return;
+    }
+
+    const { box, freeSpace, totalItemVolume } = result;
+    const tagClass = box.cls === "A" ? "tag-a" : "tag-b";
+    const utilization = ((totalItemVolume / box.volume) * 100).toFixed(1);
+
+    suitableBoxResult.innerHTML = `
+      <div class="result-box">
+        <span class="class-tag ${tagClass}">Class ${box.cls}</span>
+        <div class="big-code">${box.code}</div>
+        <div class="result-grid">
+          <div><div class="rlabel">Box Dimensions (L×W×H)</div><div class="rvalue">${box.L} × ${box.W} × ${box.H} cm</div></div>
+          <div><div class="rlabel">Box Volume</div><div class="rvalue">${box.volume.toLocaleString()} cm³</div></div>
+          <div><div class="rlabel">Items Total Volume</div><div class="rvalue">${totalItemVolume.toLocaleString()} cm³</div></div>
+          <div><div class="rlabel">Free Space (minimum)</div><div class="rvalue">${freeSpace.toLocaleString()} cm³</div></div>
+          <div><div class="rlabel">Space Utilization</div><div class="rvalue">${utilization}%</div></div>
+        </div>
+      </div>`;
+  }
+
+  getSuitableBoxBtn.addEventListener("click", () => {
+    const isValid = validateInputs();
+    if (!isValid) {
+      errorBanner.style.display = "block";
+      suitableBoxResult.innerHTML = "";
+      return;
+    }
+    errorBanner.style.display = "none";
+    const items = collectItems();
+    renderSuitableBoxResult(items);
+  });
+
+  resetItemsBtn.addEventListener("click", () => {
+    itemCountSelect.value = "";
+    itemRowsContainer.innerHTML = "";
+    suitableBoxResult.innerHTML = "";
+    errorBanner.style.display = "none";
+    getSuitableBoxBtn.style.display = "none";
+    resetItemsBtn.style.display = "none";
+    calculateRateBtn.style.display = "none";
+  });
+
+  /* ---------- SHIPMENT BOX & WEIGHT FINDER ---------- */
+  const shipmentItemCountSelect = document.getElementById("shipmentItemCountSelect");
+  for (let i = 1; i <= 30; i++) {
+    const opt = document.createElement("option");
+    opt.value = i;
+    opt.textContent = i;
+    shipmentItemCountSelect.appendChild(opt);
+  }
+
+  const shipmentItemRowsContainer = document.getElementById("shipmentItemRowsContainer");
+  const getShipmentBoxBtn = document.getElementById("getShipmentBoxBtn");
+  const resetShipmentItemsBtn = document.getElementById("resetShipmentItemsBtn");
+  const shipmentErrorBanner = document.getElementById("shipmentErrorBanner");
+  const shipmentBoxResult = document.getElementById("shipmentBoxResult");
+
+  shipmentItemCountSelect.addEventListener("change", () => {
+    const n = parseInt(shipmentItemCountSelect.value, 10) || 0;
+    shipmentBoxResult.innerHTML = "";
+    shipmentErrorBanner.style.display = "none";
+
+    if (!n) {
+      shipmentItemRowsContainer.innerHTML = "";
+      getShipmentBoxBtn.style.display = "none";
+      resetShipmentItemsBtn.style.display = "none";
+      return;
+    }
+
+    let header = shipmentItemRowsContainer.querySelector(".dim-header-weight");
+    if (!header) {
+      header = document.createElement("div");
+      header.className = "dim-header-weight";
+      header.innerHTML = "<div>Item</div><div>Length (cm)</div><div>Width (cm)</div><div>Height (cm)</div><div>Weight (kg)</div>";
+      shipmentItemRowsContainer.appendChild(header);
+    }
+
+    const existingRows = shipmentItemRowsContainer.querySelectorAll(".item-row-weight");
+    const currentCount = existingRows.length;
+
+    if (n > currentCount) {
+      for (let i = currentCount + 1; i <= n; i++) {
+        const row = document.createElement("div");
+        row.className = "item-row-weight";
+        row.innerHTML = `
+          <div class="item-label">Item ${i}</div>
+          <input type="number" min="0.1" step="0.1" class="dim-input" data-item="${i}" data-dim="L" placeholder="Length">
+          <input type="number" min="0.1" step="0.1" class="dim-input" data-item="${i}" data-dim="W" placeholder="Width">
+          <input type="number" min="0.1" step="0.1" class="dim-input" data-item="${i}" data-dim="H" placeholder="Height">
+          <input type="number" min="0.01" step="0.01" class="dim-input" data-item="${i}" data-dim="Weight" placeholder="Weight">
+        `;
+        shipmentItemRowsContainer.appendChild(row);
+      }
+    } else if (n < currentCount) {
+      for (let i = currentCount; i > n; i--) {
+        existingRows[i - 1].remove();
+      }
+    }
+
+    getShipmentBoxBtn.style.display = "inline-block";
+    resetShipmentItemsBtn.style.display = "inline-block";
+  });
+
+  function validateShipmentInputs() {
+    const inputs = shipmentItemRowsContainer.querySelectorAll(".dim-input");
+    let valid = true;
+    inputs.forEach(inp => {
+      const val = parseFloat(inp.value);
+      if (!inp.value || isNaN(val) || val <= 0) {
+        inp.classList.add("input-error");
+        valid = false;
+      } else {
+        inp.classList.remove("input-error");
+      }
+    });
+    return valid;
+  }
+
+  function collectShipmentItems() {
+    const n = parseInt(shipmentItemCountSelect.value, 10);
+    const items = [];
+    for (let i = 1; i <= n; i++) {
+      const L = parseFloat(shipmentItemRowsContainer.querySelector(`.dim-input[data-item="${i}"][data-dim="L"]`).value);
+      const W = parseFloat(shipmentItemRowsContainer.querySelector(`.dim-input[data-item="${i}"][data-dim="W"]`).value);
+      const H = parseFloat(shipmentItemRowsContainer.querySelector(`.dim-input[data-item="${i}"][data-dim="H"]`).value);
+      const Weight = parseFloat(shipmentItemRowsContainer.querySelector(`.dim-input[data-item="${i}"][data-dim="Weight"]`).value);
+      items.push({ L, W, H, Weight });
+    }
+    return items;
+  }
+
+  // Shared box-fitting result for the app's shipment flow (intended for the
+  // upcoming CalculateRate integration: box dimensions + ActualWeight).
+  window.shipmentBoxAndWeight = null;
+
+  function renderShipmentBoxResult(items) {
+    const totalWeight = items.reduce((sum, it) => sum + it.Weight, 0);
+    const result = findBestBox(items); // items' L/W/H drive box fit; weight doesn't affect packing
+
+    if (!result) {
+      window.shipmentBoxAndWeight = null;
+      shipmentBoxResult.innerHTML = `
+        <div class="result-box fail">
+          <div class="big-code" style="color:var(--err);">No suitable box found</div>
+          <p style="margin-top:10px; color:#666;">
+            None of the available Class A or Class B boxes can fit these items together
+            (either the combined volume or the individual item dimensions exceed the largest
+            available box: A-19 (100×100×100) or B-14 (150×75×75)).
+          </p>
+          <div class="result-grid" style="margin-top:10px;">
+            <div><div class="rlabel">Total Shipment Weight</div><div class="rvalue">${totalWeight.toLocaleString()} kg</div></div>
+          </div>
+        </div>`;
+      return;
+    }
+
+    const { box, freeSpace, totalItemVolume } = result;
+    const tagClass = box.cls === "A" ? "tag-a" : "tag-b";
+    const utilization = ((totalItemVolume / box.volume) * 100).toFixed(1);
+
+    window.shipmentBoxAndWeight = { box, totalWeight, freeSpace, totalItemVolume };
+
+    shipmentBoxResult.innerHTML = `
+      <div class="result-box">
+        <span class="class-tag ${tagClass}">Class ${box.cls}</span>
+        <div class="big-code">${box.code}</div>
+        <div class="result-grid">
+          <div><div class="rlabel">Box Dimensions (L×W×H)</div><div class="rvalue">${box.L} × ${box.W} × ${box.H} cm</div></div>
+          <div><div class="rlabel">Box Volume</div><div class="rvalue">${box.volume.toLocaleString()} cm³</div></div>
+          <div><div class="rlabel">Items Total Volume</div><div class="rvalue">${totalItemVolume.toLocaleString()} cm³</div></div>
+          <div><div class="rlabel">Free Space (minimum)</div><div class="rvalue">${freeSpace.toLocaleString()} cm³</div></div>
+          <div><div class="rlabel">Space Utilization</div><div class="rvalue">${utilization}%</div></div>
+          <div><div class="rlabel">Total Shipment Weight</div><div class="rvalue">${totalWeight.toLocaleString()} kg</div></div>
+        </div>
+      </div>`;
+  }
+
+  getShipmentBoxBtn.addEventListener("click", () => {
+    const isValid = validateShipmentInputs();
+    if (!isValid) {
+      shipmentErrorBanner.style.display = "block";
+      shipmentBoxResult.innerHTML = "";
+      return;
+    }
+    shipmentErrorBanner.style.display = "none";
+    const items = collectShipmentItems();
+    renderShipmentBoxResult(items);
+  });
+
+  resetShipmentItemsBtn.addEventListener("click", () => {
+    shipmentItemCountSelect.value = "";
+    shipmentItemRowsContainer.innerHTML = "";
+    shipmentBoxResult.innerHTML = "";
+    shipmentErrorBanner.style.display = "none";
+    getShipmentBoxBtn.style.display = "none";
+    resetShipmentItemsBtn.style.display = "none";
+    window.shipmentBoxAndWeight = null;
+  });
+
+  /* ---------- Copy Smart Box Finder items into Shipment Box & Weight Finder ---------- */
+  calculateRateBtn.addEventListener("click", () => {
+    const n = parseInt(itemCountSelect.value, 10) || 0;
+    if (!n) return;
+
+    // Set the Shipment section's item count and let it build the matching
+    // number of rows (this also preserves any of ITS existing values for
+    // items within the new count, same as a manual dropdown change would).
+    shipmentItemCountSelect.value = n;
+    shipmentItemCountSelect.dispatchEvent(new Event("change"));
+
+    // Copy each item's Length/Width/Height across. Weight is left as-is
+    // (blank for new rows) since the Smart Box Finder doesn't collect it.
+    for (let i = 1; i <= n; i++) {
+      ["L", "W", "H"].forEach(dim => {
+        const source = itemRowsContainer.querySelector(`.dim-input[data-item="${i}"][data-dim="${dim}"]`);
+        const target = shipmentItemRowsContainer.querySelector(`.dim-input[data-item="${i}"][data-dim="${dim}"]`);
+        if (source && target) target.value = source.value;
+      });
+    }
+
+    // Bring the Shipment section into view so the user can add weights next.
+    document.getElementById("shipmentItemCountSelect").closest(".container").scrollIntoView({ behavior: "smooth", block: "start" });
+  });
+
+  /* ---------- CALCULATE RATE ---------- */
+  const CALCULATE_RATE_URL = "http://localhost:3001/api/calculate-rate";
+
+  // From Aramex's product type reference document
+  const EXP_PRODUCT_TYPES = [
+    ["PLX", "Priority Letter Express"],
+    ["PDX", "Priority Document Express"],
+    ["PPX", "Priority Parcel Express"],
+    ["DDX", "Deferred Document Express"],
+    ["DPX", "Deferred Parcel Express"],
+    ["GDX", "Ground Document Express"],
+    ["GPX", "Ground Parcel Express"],
+    ["LHS", "Linehaul Service"],
+    ["EDX", "E-Commerce Document Express"],
+    ["EPX", "E-Commerce Parcel Express"],
+    ["ETP", "E-Commerce Tracking Postal"],
+    ["EUP", "E-Commerce Untracking Postal"],
+    ["EPP", "E-commerce Plus Postal"],
+    ["IBD", "International Bulk Delivery Shipments"],
+    ["BBX", "Break Bulk Shipments"],
+    ["SDX", "Shop and Ship Document Express"],
+    ["SPX", "Shop and Ship Parcel Express"],
+    ["CDX", "Corporate Shop and Ship Document Express"],
+    ["CPX", "Corporate Shop and Ship Parcel Express"],
+    ["SDG", "Shop and Ship - Dangerous Goods"],
+    ["ABX", "Aramex Beverage Express"],
+    ["AMX", "Aramex Medical Express"],
+    ["CGX", "Courier Cargo Express"],
+    ["DGG", "Land Dangerous Goods Shipment"],
+    ["DGX", "Dangerous Goods Shipment"],
+    ["DIM", "Direct Injection Model"],
+    ["HWX", "Heavy Weight Express"],
+    ["MPX", "MED Shipments - Parcel"],
+    ["PXD", "Premium Document Express"],
+    ["PXP", "Premium Parcel Express"],
+    ["MYP", "MyUS Parcels"],
+    ["MYD", "MyUS Documents"],
+    ["VPX", "Vapes / Vape-Related Products"],
+    ["RDG", "Returned Dangerous Goods"],
+    ["RDL", "Returned Dangerous Goods by Land"],
+    ["RMY", "Returned MyUS"]
+  ];
+
+  const DOM_PRODUCT_TYPES = [
+    ["BLK", "Bulk Service"],
+    ["BLT", "Bullet Delivery"],
+    ["BNK", "Bank Shipments"],
+    ["CDA", "Special Delivery"],
+    ["CDS", "E-Commerce / Special Credit Card Delivery"],
+    ["COM", "Office Supplies"],
+    ["DEC", "Document Economy Delivery"],
+    ["DEX", "Document Express"],
+    ["EMD", "Early Morning Delivery"],
+    ["FIX", "Fixed Price"],
+    ["FTL", "Full Truck Load"],
+    ["LGS", "Logistic Shipment"],
+    ["OND", "Overnight Document"],
+    ["ONP", "Overnight Parcel"],
+    ["P24", "Road Freight 24 Hours Service"],
+    ["P48", "Road Freight 48 Hours Service"],
+    ["PEC", "Economy Delivery Parcel"],
+    ["RTS", "Return Service"],
+    ["SDD", "Same Day Delivery"],
+    ["SFC", "Surface Cargo - India"],
+    ["SMD", "Same Day Document Delivery"],
+    ["SMP", "Same Day Parcel Delivery"],
+    ["SPD", "Domestic Special"],
+    ["SPL", "Special Shipments"]
+  ];
+
+  const ratePreferredCurrency = document.getElementById("ratePreferredCurrency");
+  const rateProductType = document.getElementById("rateProductType");
+  const rateProductGroupLabel = document.getElementById("rateProductGroupLabel");
+  const getRateBtn = document.getElementById("getRateBtn");
+  const rateStatus = document.getElementById("rateStatus");
+  const rateResult = document.getElementById("rateResult");
+
+  // Recomputes DOM/EXP from the current Origin/Destination countries and
+  // repopulates the Product Type dropdown accordingly, keeping the current
+  // selection if it's still valid for the (possibly new) group.
+  function refreshProductTypeOptions() {
+    const originCode = document.getElementById("originCountry").value;
+    const destCode = document.getElementById("destCountry").value;
+
+    if (!originCode || !destCode) {
+      rateProductGroupLabel.textContent = "-- select both addresses --";
+      rateProductType.innerHTML = '<option value="">-- Select both addresses first --</option>';
+      return;
+    }
+
+    const group = originCode === destCode ? "DOM" : "EXP";
+    const list = group === "DOM" ? DOM_PRODUCT_TYPES : EXP_PRODUCT_TYPES;
+    rateProductGroupLabel.textContent = group;
+
+    const previousValue = rateProductType.value;
+    rateProductType.innerHTML = '<option value="">-- Select Product Type --</option>';
+    list.forEach(([code, label]) => {
+      const opt = document.createElement("option");
+      opt.value = code;
+      opt.textContent = `${code} - ${label}`;
+      rateProductType.appendChild(opt);
+    });
+    if (list.some(([code]) => code === previousValue)) {
+      rateProductType.value = previousValue;
+    }
+  }
+
+  document.getElementById("originCountry").addEventListener("change", refreshProductTypeOptions);
+  document.getElementById("destCountry").addEventListener("change", refreshProductTypeOptions);
+  refreshProductTypeOptions();
+
+  function buildRatePayload() {
+    const creds = window.aramexCredentials;
+    const origin = collectAddressData("origin");
+    const dest = collectAddressData("dest");
+    const box = window.shipmentBoxAndWeight.box;
+    const totalWeight = window.shipmentBoxAndWeight.totalWeight;
+
+    const productGroup = origin.CountryCode === dest.CountryCode ? "DOM" : "EXP";
+
+    return {
+      ClientInfo: buildClientInfo(creds),
+      OriginAddress: origin,
+      DestinationAddress: dest,
+      PreferredCurrencyCode: ratePreferredCurrency.value.trim(),
+      ShipmentDetails: {
+        Dimensions: { Length: box.L, Width: box.W, Height: box.H, Unit: "CM" },
+        ActualWeight: { Unit: "KG", Value: totalWeight },
+        ChargeableWeight: null,
+        DescriptionOfGoods: null,
+        GoodsOriginCountry: null,
+        NumberOfPieces: 1,
+        ProductGroup: productGroup,
+        ProductType: rateProductType.value.trim(),
+        PaymentType: "P",
+        PaymentOptions: "",
+        CustomsValueAmount: null,
+        CashOnDeliveryAmount: null,
+        InsuranceAmount: null,
+        CashAdditionalAmount: null,
+        CashAdditionalAmountDescription: null,
+        CollectAmount: null,
+        Services: "",
+        Items: null,
+        DeliveryInstructions: null
+      },
+      Transaction: { Reference1: "", Reference2: "", Reference3: "", Reference4: "", Reference5: "" }
+    };
+  }
+
+  function renderRateResult(data) {
+    // Aramex's CalculateRate response shape wasn't provided, so this handles
+    // the common "TotalAmount" shape defensively and falls back to showing
+    // the raw response if the shape doesn't match what's expected.
+    if (data.TotalAmount && typeof data.TotalAmount.Value !== "undefined") {
+      rateResult.innerHTML = `
+        <div class="result-box">
+          <div class="rlabel">Shipping Rate</div>
+          <div class="big-code">${data.TotalAmount.Value} ${data.TotalAmount.CurrencyCode || ""}</div>
+        </div>`;
+    } else {
+      rateResult.innerHTML = `
+        <div class="result-box">
+          <div class="rlabel">Raw API Response</div>
+          <pre style="white-space:pre-wrap; font-size:13px; margin-top:8px;">${JSON.stringify(data, null, 2)}</pre>
+        </div>`;
+    }
+  }
+
+  getRateBtn.addEventListener("click", async () => {
+    rateResult.innerHTML = "";
+    rateStatus.textContent = "";
+    rateStatus.className = "address-status";
+
+    const creds = window.aramexCredentials;
+    if (!creds.UserName || !creds.Password || !creds.AccountNumber || !creds.AccountPin || !creds.AccountEntity) {
+      rateStatus.textContent = "Please fill in and save the Aramex API Credentials section first.";
+      rateStatus.className = "address-status error";
+      return;
+    }
+
+    const origin = collectAddressData("origin");
+    const dest = collectAddressData("dest");
+    if (!origin.CountryCode || !origin.City || !origin.Line1) {
+      rateStatus.textContent = "Please complete the Origin Address (Country, City, and Address Line 1 are required).";
+      rateStatus.className = "address-status error";
+      return;
+    }
+    if (!dest.CountryCode || !dest.City || !dest.Line1) {
+      rateStatus.textContent = "Please complete the Destination Address (Country, City, and Address Line 1 are required).";
+      rateStatus.className = "address-status error";
+      return;
+    }
+
+    if (!window.shipmentBoxAndWeight || !window.shipmentBoxAndWeight.box) {
+      rateStatus.textContent = "Please calculate a suitable box first in the Shipment Box & Weight Finder section above.";
+      rateStatus.className = "address-status error";
+      return;
+    }
+
+    if (!rateProductType.value.trim()) {
+      rateProductType.classList.add("input-error");
+      rateStatus.textContent = "Please enter a Product Type.";
+      rateStatus.className = "address-status error";
+      return;
+    }
+    rateProductType.classList.remove("input-error");
+
+    if (!ratePreferredCurrency.value.trim()) {
+      rateStatus.textContent = "Please enter a Preferred Currency Code.";
+      rateStatus.className = "address-status error";
+      return;
+    }
+
+    rateStatus.textContent = "Getting rate...";
+    rateStatus.className = "address-status loading";
+
+    try {
+      const payload = buildRatePayload();
+      const res = await fetch(CALCULATE_RATE_URL, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(payload)
+      });
+      const data = await res.json();
+
+      if (data.HasErrors) {
+        const msg = (data.Notifications && data.Notifications.length)
+          ? data.Notifications.map(n => n.Message).join("; ") : "Unknown error";
+        rateStatus.textContent = "Aramex error: " + msg;
+        rateStatus.className = "address-status error";
+        return;
+      }
+
+      rateStatus.textContent = "";
+      rateStatus.className = "address-status";
+      renderRateResult(data);
+    } catch (err) {
+      rateStatus.textContent = "Could not reach the local proxy (http://localhost:3001). Make sure it's running: node proxy.js. " + err.message;
+      rateStatus.className = "address-status error";
+    }
+  });
+</script>
+</body>
+</html>
